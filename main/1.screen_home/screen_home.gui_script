@@ -1,0 +1,89 @@
+---========================---
+---== LUA MODULE IMPORTS ==---
+---========================---
+local debugdraw = require("lua-modules.libs-defold.debug-draw.debug-draw")
+local defmath = require("lua-modules.libs-defold.defmath.defmath")
+local lume = require("lua-modules.libs-external.lume.lume")
+local gui_extra = require("lua-modules.libs-defold.gui_extra.gui_extra")
+local monarch = require("lua-modules.libs-defold.monarch.monarch")
+local transitions = require("lua-modules.libs-defold.monarch.transitions.gui")
+local rc = require("lua-modules.libs-defold.rendercam.rendercam")
+
+---========================---
+---========================---
+
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	gui.set_render_order(1)
+
+	self.to_shop = 0
+	self.from_shop = 0
+	
+	self.data = monarch.data("screen_home")
+	--[[if self.data ~= nil then
+		if self.data.from_shop == 1 then
+			print("SCREEN_HOME DISPLAYED!")
+			self.from_shop = self.data.from_shop
+		else print("SCREEN_HOME DISPLAYED! (from Shop)")
+		end
+	end]]--
+
+
+	self.transition_init_btn_popup_purchase = transitions.create(gui.get_node("btn_popup_purchase"))
+		.show_in(transitions.slide_in_left, gui.EASING_OUTQUAD, 0.5, 0)
+		.show_out(transitions.slide_out_left, gui.EASING_INQUAD, 0.5, 0)
+		.back_in(transitions.slide_in_left, gui.EASING_OUTQUAD, 0.3, 0)
+		.back_out(transitions.slide_out_left, gui.EASING_INQUAD, 0.3, 0)
+
+	self.transition_init_btn_screen_shop = transitions.create(gui.get_node("btn_screen_shop"))
+		.show_in(transitions.slide_in_right, gui.EASING_OUTQUAD, 0.5, 0)
+		.show_out(transitions.slide_out_right, gui.EASING_INQUAD, 0.5, 0)
+		.back_in(transitions.slide_in_right, gui.EASING_OUTQUAD, 0.3, 0)
+		.back_out(transitions.slide_out_right, gui.EASING_INQUAD, 0.3, 0)
+
+	self.transition_black_filter = transitions.create(gui.get_node("black_filter"))
+		.show_in(transitions.fade_out, gui.EASING_OUTQUAD, 3, 0)
+		.show_out(transitions.fade_in, gui.EASING_INQUAD, 3, 0)
+		.back_in(transitions.fade_out, gui.EASING_OUTQUAD, 3, 0)
+		.back_out(transitions.fade_in, gui.EASING_INQUAD, 3, 0)
+	
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("touch") and action.pressed then
+		if gui.pick_node(gui.get_node("btn_popup_purchase"), action.x, action.y) then
+			print("POPUP_PURCHASE TRIGGERED!")
+			monarch.show("popup_purchase")
+		elseif gui.pick_node(gui.get_node("btn_screen_shop"), action.x, action.y) then
+			print("SCREEN_SHOP TRIGGERED! (from Screen_Home)")
+			monarch.show("screen_shop", nil, { from_popup = 0 })
+			self.to_shop = 1
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+--[[
+	if self.from_shop == 0 and self.to_shop == 0 then
+		self.transition_init_btn_popup_purchase.handle(message_id, message, sender)
+		self.transition_init_btn_screen_shop.handle(message_id, message, sender)
+	end
+	
+	if self.from_shop == 1 or self.to_shop == 1 then
+		self.transition_screen_shop.handle(message_id, message, sender)
+		self.from_shop = 0
+		self.to_shop = 0
+	end
+	]]--
+	
+	self.transition_init_btn_popup_purchase.handle(message_id, message, sender)
+	self.transition_init_btn_screen_shop.handle(message_id, message, sender)
+	
+	self.transition_black_filter.handle(message_id, message, sender)
+			
+	if message_id == monarch.TRANSITION.DONE and message.transition == monarch.TRANSITION.SHOW_IN then
+		print("SCREEN_HOME transition finished!")
+	end
+	
+end

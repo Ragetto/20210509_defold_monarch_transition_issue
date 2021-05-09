@@ -1,0 +1,51 @@
+---========================---
+---== LUA MODULE IMPORTS ==---
+---========================---
+local debugdraw = require("lua-modules.libs-defold.debug-draw.debug-draw")
+local defmath = require("lua-modules.libs-defold.defmath.defmath")
+local lume = require("lua-modules.libs-external.lume.lume")
+local gui_extra = require("lua-modules.libs-defold.gui_extra.gui_extra")
+local monarch = require("lua-modules.libs-defold.monarch.monarch")
+local transitions = require("lua-modules.libs-defold.monarch.transitions.gui")
+local rc = require("lua-modules.libs-defold.rendercam.rendercam")
+
+---========================---
+---========================---
+
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	gui.set_render_order(4)
+	self.data = monarch.data("screen_shop")
+	if self.data.from_popup == 1 then
+		print("SCREEN_SHOP DISPLAYED! (from Popup_Not_Enough_Cash)")
+	else print("SCREEN_SHOP DISPLAYED! (from Screen_Home)")
+	end
+
+	self.transition = transitions.create(gui.get_node("black_filter"))
+		.show_in(transitions.fade_out, gui.EASING_OUTQUAD, 0.3, 0)
+		.show_out(transitions.fade_in, gui.EASING_INQUAD, 0.3, 0)
+		.back_in(transitions.fade_out, gui.EASING_OUTQUAD, 0.3, 0)
+		.back_out(transitions.fade_in, gui.EASING_INQUAD, 0.3, 0)
+	
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("touch") and action.pressed then
+		if gui.pick_node(gui.get_node("btn_back"), action.x, action.y) then
+			print("SCREEN_SHOP CLOSED!")
+			print("SCREEN_HOME TRIGGERED (from Screen_Shop)!")
+			monarch.back({ from_shop = 1 })
+			if self.data.from_popup == 1 then
+				monarch.show("popup_purchase")
+				self.data.from_popup = 0
+			end
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+
+	self.transition.handle(message_id, message, sender)	
+
+end

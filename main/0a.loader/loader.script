@@ -1,0 +1,27 @@
+---========================---
+---== LUA MODULE IMPORTS ==---
+---========================---
+local debugdraw = require("lua-modules.libs-defold.debug-draw.debug-draw")
+local defmath = require("lua-modules.libs-defold.defmath.defmath")
+local lume = require("lua-modules.libs-external.lume.lume")
+local gui_extra = require("lua-modules.libs-defold.gui_extra.gui_extra")
+local monarch = require("lua-modules.libs-defold.monarch.monarch")
+local rc = require("lua-modules.libs-defold.rendercam.rendercam")
+
+---========================---
+---========================---
+
+
+function init(self)
+	--monarch.debug()
+	--msg.post(".", "acquire_input_focus")
+	msg.post("#", "show_screen_home") -- wait until init() has been called for all screen.script instances
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("show_screen_home") then
+		monarch.show(("background"), { no_stack = true })
+		monarch.show("screen_home")
+		print("SCREEN_HOME TRIGGERED!")
+	end
+end
